@@ -9,6 +9,9 @@ version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://repo.q64.io/rain-public")
+    }
 }
 
 dependencies {
@@ -19,6 +22,8 @@ dependencies {
 
     // serialization
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+
+    implementation("co.q64.rain:raindrop:1.19-SNAPSHOT")
 }
 
 tasks.test {
