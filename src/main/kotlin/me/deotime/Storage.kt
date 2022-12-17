@@ -34,13 +34,12 @@ interface Storage {
 
         }
 
-        interface Collection<T> : Property {
+        interface Collection<T> : Property, Flow<T> {
 
             val size: Int
 
             suspend fun add(element: T)
 
-            fun toFlow(): Flow<T>
         }
 
         interface Map<K, V> : Collection<Pair<K, V>> {
@@ -69,8 +68,8 @@ fun <K, V> Storage.map(keyType: KType, valueType: KType) = PropertyFactory.creat
 
 inline fun <reified T> Storage.property() = property<T?>(null)
 inline fun <reified T> Storage.property(default: T) = property(typeOf<T>(), default)
-inline fun <reified T> Storage.collection(): Storage.Property.Delegate<Storage.Property.Collection<T>> = collection(typeOf<T>())
-inline fun <reified K, reified V> Storage.map(): Storage.Property.Delegate<Storage.Property.Map<K, V>> = map(typeOf<K>(), typeOf<V>())
+inline fun <reified T> Storage.collection() = collection<T>(typeOf<T>())
+inline fun <reified K, reified V> Storage.map() = map<K, V>(typeOf<K>(), typeOf<V>())
 
 
 suspend inline fun <T, U> Storage.Property.Single<T>.update(lens: Lens.Simple<T, U>, closure: (U) -> U): Unit =
