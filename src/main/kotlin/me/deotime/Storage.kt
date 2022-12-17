@@ -2,6 +2,10 @@ package me.deotime
 
 import co.q64.raindrop.optics.Getter
 import co.q64.raindrop.optics.Lens
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 
 
 interface Storage {
@@ -18,12 +22,19 @@ interface Storage {
     }
 
 
-    interface Map<K, V> {
+    interface Collection<T> {
+
+        val size: Int
+        fun toFlow(): Flow<T>
+
+    }
+
+
+    interface Map<K, V> : Collection<Pair<K, V>> {
 
         suspend infix fun get(key: K)
         suspend fun set(key: K, value: V)
 
-        interface List<T> : Map<Int, T>
     }
 
     data class Update<T>(
@@ -32,6 +43,10 @@ interface Storage {
     )
 
 
+}
+
+fun test() {
+    listOf<String>().asFlow()
 }
 
 suspend inline fun <T, U> Storage.Property<T>.update(lens: Lens.Simple<T, U>, closure: (U) -> U): Unit =
