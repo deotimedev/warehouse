@@ -11,18 +11,23 @@ internal class SinglePropertyImpl<T>(
     private val default: T
 ) : Storage.Property.Single<T>, AbstractProperty<T>() {
 
-    private val file = File(location, name).apply {
-        createNewFile()
-        write(default)
+    init {
+        location.apply {
+            if(!exists()) {
+                if(!parentFile.exists()) parentFile.mkdirs()
+                createNewFile()
+                write(default)
+            }
+        }
     }
 
-    override suspend fun get() = sync { read() }
+    override suspend fun get() = sync { location.read() }
 
-    override suspend fun set(value: T) = sync { write(value) }
+    override suspend fun set(value: T) = sync { location.write(value) }
 
-    private fun read() = serializer.deserialize(file)
+    private fun File.read() = serializer.deserialize(this)
 
-    private fun write(value: T) {
-        file.writeText(serializer.serialize(value))
+    private fun File.write(value: T) {
+        writeText(serializer.serialize(value))
     }
 }

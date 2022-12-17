@@ -15,7 +15,7 @@ internal abstract class AbstractProperty<T> {
     abstract val storage: Storage
 
     private val mutex = Mutex()
-    protected val location by lazy { File(storage.root, storage.name) }
+    protected val location by lazy { File(File(storage.root, storage.name), name) }
 
     protected suspend fun <R> sync(closure: suspend () -> R) =
         withContext(Dispatchers.IO) { mutex.withLock { closure() } }

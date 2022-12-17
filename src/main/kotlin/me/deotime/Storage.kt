@@ -18,9 +18,6 @@ interface Storage {
         val name: String
         val storage: Storage
 
-
-        operator fun getValue(ref: Any?, prop: KProperty<*>) = this
-
         interface Delegate<T : Property> {
             operator fun provideDelegate(ref: Storage, prop: KProperty<*>): T
         }
@@ -33,14 +30,16 @@ interface Storage {
             suspend fun <U> set(setter: Lens.Simple<T, U>, value: U) = update(setter) { value }
             suspend infix fun set(value: T)
 
+            operator fun getValue(ref: Any?, prop: KProperty<*>) = this
         }
 
         interface Collection<T> : Property, Flow<T> {
 
             suspend fun size(): Int
 
-            suspend fun add(element: T)
+            suspend infix fun add(element: T)
 
+            operator fun getValue(ref: Any?, prop: KProperty<*>) = this
         }
 
         interface Map<K, V> : Collection<Pair<K, V>> {
@@ -48,6 +47,7 @@ interface Storage {
             suspend infix fun get(key: K): V?
             suspend fun set(key: K, value: V?)
 
+            override operator fun getValue(ref: Any?, prop: KProperty<*>) = this
         }
 
 

@@ -26,7 +26,7 @@ internal open class CollectionPropertyImpl<T>(
 
     override suspend fun collect(collector: FlowCollector<T>) = sync {
         flow {
-            location.listFiles().orEmpty().forEach { emit(serializer.deserialize(it)) }
+            for(item in location.listFiles().orEmpty()) emit(serializer.deserialize(item))
         }.collect(collector)
     }
 
