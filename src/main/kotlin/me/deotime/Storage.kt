@@ -18,6 +18,7 @@ interface Storage {
         val name: String
         val storage: Storage
 
+
         operator fun getValue(ref: Any?, prop: KProperty<*>) = this
 
         interface Delegate<T : Property> {
