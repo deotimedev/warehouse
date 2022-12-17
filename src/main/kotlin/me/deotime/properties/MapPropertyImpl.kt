@@ -5,19 +5,23 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import me.deotime.Storage
+import java.io.File
 
 internal class MapPropertyImpl<K, V>(
     override val name: String,
     override val storage: Storage,
     private val keySerializer: KSerializer<K>,
     private val valueKSerializer: KSerializer<V>
-) : Storage.Property.Map<K, V>, Storage.Property.Collection<Pair<K, V>> by CollectionPropertyImpl(name, storage, mapPropertySerializer()) {
-    override suspend fun get(key: K) {
-        TODO("Not yet implemented")
+) : Storage.Property.Map<K, V>, CollectionPropertyImpl<Pair<K, V>>(name, storage, mapPropertySerializer()) {
+    override suspend fun get(key: K) = sync {
+        File(location, keySerializer.serialize(key)).takeIf { it.exists() }?.let { valueKSerializer.deserialize(it) }
     }
 
-    override suspend fun set(key: K, value: V?) {
-        TODO("Not yet implemented")
+    override suspend fun set(key: K, value: V?): Unit = sync {
+        val name = keySerializer.serialize(key)
+        value?.let {
+            putItem(name, valueKSerializer.serialize(it))
+        } ?: File(location, name).takeIf { it.exists() }?.delete()
     }
 
     companion object {

@@ -37,7 +37,7 @@ interface Storage {
 
         interface Collection<T> : Property, Flow<T> {
 
-            val size: Int
+            suspend fun size(): Int
 
             suspend fun add(element: T)
 
@@ -45,7 +45,7 @@ interface Storage {
 
         interface Map<K, V> : Collection<Pair<K, V>> {
 
-            suspend infix fun get(key: K)
+            suspend infix fun get(key: K): V?
             suspend fun set(key: K, value: V?)
 
         }
