@@ -10,7 +10,9 @@ internal object PropertyFactory {
     fun <T> createProperty(type: KType, default: T): Storage.Property.Delegate<Storage.Property.Single<T>> =
         PropertyInitializer.Single(type, default)
 
-    fun <T> createCollection(type: KType): Storage.Property.Delegate<Storage.Property.Collection<T>> = PropertyInitializer.Collection(type)
+    fun <T> createCollection(type: KType): Storage.Property.Delegate<Storage.Property.Collection<T>> =
+        PropertyInitializer.Collection(type)
+
     fun <K, V> createMap(keyType: KType, valueKType: KType): Storage.Property.Delegate<Storage.Property.Map<K, V>> =
         PropertyInitializer.Map(keyType, valueKType)
 
@@ -42,7 +44,8 @@ internal object PropertyFactory {
                     name,
                     storage,
                     keyType.serializer as KSerializer<K>,
-                    valueKType.serializer as KSerializer<V>)
+                    valueKType.serializer as KSerializer<V>
+                )
         }
     }
 }

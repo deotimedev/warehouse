@@ -17,7 +17,8 @@ internal abstract class AbstractProperty<T> {
     private val mutex = Mutex()
     protected val location by lazy { File(storage.root, storage.name) }
 
-    protected suspend fun <R> sync(closure: suspend () -> R) = withContext(Dispatchers.IO) { mutex.withLock { closure() } }
+    protected suspend fun <R> sync(closure: suspend () -> R) =
+        withContext(Dispatchers.IO) { mutex.withLock { closure() } }
 
     protected fun <A> KSerializer<A>.serialize(value: A) = Json.encodeToString(this, value)
     fun <A> KSerializer<A>.deserialize(data: File) = Json.decodeFromString(this, data.readText())
