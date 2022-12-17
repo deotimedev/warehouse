@@ -1,55 +1,58 @@
 package me.deotime
 
-import co.q64.raindrop.Empty
 import co.q64.raindrop.optics.Getter
 import co.q64.raindrop.optics.Lens
-import co.q64.raindrop.standard.algebra.orEmpty
 import kotlinx.coroutines.flow.Flow
+import me.deotime.properties.PropertyFactory
 import kotlin.reflect.KProperty
+import kotlin.reflect.KType
+import kotlin.reflect.typeOf
 
 interface Storage {
 
     val root: String
     val name: String
 
-    interface Member {
+    sealed interface Property {
 
         val name: String
         val storage: Storage
 
         operator fun getValue(ref: Any?, prop: KProperty<*>) = this
 
-        interface Delegate<T : Member> {
+        interface Delegate<T : Property> {
             operator fun provideDelegate(ref: Storage, prop: KProperty<*>): T
         }
 
+        interface Single<T> : Property {
+
+            suspend fun get(): T
+            suspend infix fun <U> get(getter: Getter<T, U>) = getter.view(get())
+
+            suspend fun <U> set(setter: Lens.Simple<T, U>, value: U) = update(setter) { value }
+            suspend infix fun set(value: T)
+
+        }
+
+        interface Collection<T> : Property {
+
+            val size: Int
+
+            suspend fun add(element: T)
+
+            fun toFlow(): Flow<T>
+        }
+
+        interface Map<K, V> : Collection<Pair<K, V>> {
+
+            suspend infix fun get(key: K)
+            suspend fun set(key: K, value: V?)
+
+        }
+
+
     }
 
-    interface Property<T> : Member {
-
-        suspend fun get(): T
-        suspend infix fun <U> get(getter: Getter<T, U>) = getter.view(get())
-
-        suspend fun <U> set(setter: Lens.Simple<T, U>, value: U) = update(setter) { value }
-        suspend infix fun set(value: T)
-
-    }
-
-
-    interface Collection<T> : Member {
-
-        val size: Int
-        fun toFlow(): Flow<T>
-
-    }
-
-
-    interface Map<K, V> : Collection<Pair<K, V>> {
-
-        suspend infix fun get(key: K)
-        suspend fun set(key: K, value: V)
-
-    }
 
     data class Update<T>(
         val before: T,
@@ -59,10 +62,18 @@ interface Storage {
 
 }
 
-inline fun <reified T> Storage.property(): Storage.Member.Delegate<Storage.Property<T?>> = property(null)
-inline fun <reified T> Storage.property(default: T): Storage.Member.Delegate<Storage.Property<T>> = TODO()
 
-suspend inline fun <T, U> Storage.Property<T>.update(lens: Lens.Simple<T, U>, closure: (U) -> U): Unit =
+fun <T> Storage.property(type: KType, default: T) = PropertyFactory.createProperty(type, default)
+fun <T> Storage.collection(type: KType) = PropertyFactory.createCollection<T>(type)
+fun <K, V> Storage.map(keyType: KType, valueType: KType) = PropertyFactory.createMap<K, V>(keyType, valueType)
+
+inline fun <reified T> Storage.property() = property<T?>(null)
+inline fun <reified T> Storage.property(default: T) = property(typeOf<T>(), default)
+inline fun <reified T> Storage.collection(): Storage.Property.Delegate<Storage.Property.Collection<T>> = collection(typeOf<T>())
+inline fun <reified K, reified V> Storage.map(): Storage.Property.Delegate<Storage.Property.Map<K, V>> = map(typeOf<K>(), typeOf<V>())
+
+
+suspend inline fun <T, U> Storage.Property.Single<T>.update(lens: Lens.Simple<T, U>, closure: (U) -> U): Unit =
     get().let { Storage.Update(it, lens.set(it, lens.view(it).let(closure)).also { set(it) }) }
 
-suspend inline infix fun <T> Storage.Property<T>.update(closure: (T) -> T) = update(Lens.id(), closure)
+suspend inline infix fun <T> Storage.Property.Single<T>.update(closure: (T) -> T) = update(Lens.id(), closure)
