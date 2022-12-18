@@ -1,9 +1,9 @@
-package me.deotime.properties
+package me.deotime.warehouse.properties
 
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.KSerializer
-import me.deotime.Storage
+import me.deotime.warehouse.Storage
 import java.io.File
 import java.util.UUID
 

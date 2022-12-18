@@ -1,4 +1,4 @@
-package me.deotime.properties
+package me.deotime.warehouse.properties
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
@@ -9,7 +9,7 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import me.deotime.Storage
+import me.deotime.warehouse.Storage
 import java.io.File
 
 internal class MapPropertyImpl<K, V>(

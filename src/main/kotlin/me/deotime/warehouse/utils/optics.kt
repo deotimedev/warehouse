@@ -1,5 +1,5 @@
 @file:Suppress("NOTHING_TO_INLINE")
-package me.deotime.utils
+package me.deotime.warehouse.utils
 
 import co.q64.raindrop.optics.Getter
 import co.q64.raindrop.optics.Setter

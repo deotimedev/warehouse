@@ -1,4 +1,4 @@
-package me.deotime.properties
+package me.deotime.warehouse.properties
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -6,7 +6,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import me.deotime.Storage
+import me.deotime.warehouse.Storage
 import java.io.File
 
 internal abstract class AbstractProperty<T> {

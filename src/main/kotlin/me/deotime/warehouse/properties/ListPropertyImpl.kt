@@ -1,12 +1,12 @@
-package me.deotime.properties
+package me.deotime.warehouse.properties
 
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.fold
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
-import me.deotime.Storage
-import me.deotime.properties.AbstractProperty.Companion.deserialize
+import me.deotime.warehouse.Storage
+import me.deotime.warehouse.properties.AbstractProperty.Companion.deserialize
 import java.io.File
 import java.util.UUID
 import kotlin.math.max

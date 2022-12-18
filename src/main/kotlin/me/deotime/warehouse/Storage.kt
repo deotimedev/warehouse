@@ -1,9 +1,9 @@
-package me.deotime
+package me.deotime.warehouse
 
 import co.q64.raindrop.optics.Getter
 import co.q64.raindrop.optics.Lens
 import kotlinx.coroutines.flow.Flow
-import me.deotime.properties.PropertyFactory
+import me.deotime.warehouse.properties.PropertyFactory
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf

@@ -1,7 +1,7 @@
-package me.deotime.properties
+package me.deotime.warehouse.properties
 
 import kotlinx.serialization.KSerializer
-import me.deotime.Storage
+import me.deotime.warehouse.Storage
 import java.io.File
 
 internal class SinglePropertyImpl<T>(

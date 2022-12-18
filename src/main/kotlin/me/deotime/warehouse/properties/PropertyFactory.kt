@@ -1,8 +1,8 @@
-package me.deotime.properties
+package me.deotime.warehouse.properties
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
-import me.deotime.Storage
+import me.deotime.warehouse.Storage
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 
