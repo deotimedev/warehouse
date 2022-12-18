@@ -13,16 +13,19 @@ interface Storage {
     val root: String
     val name: String
 
-    sealed interface Property {
+    sealed interface Property<Self : Property<Self>> {
 
         val name: String
         val storage: Storage
 
-        interface Delegate<T : Property> {
+        @Suppress("UNCHECKED_CAST")
+        operator fun getValue(ref: Any?, prop: KProperty<*>) = this as Self
+
+        interface Delegate<T : Property<*>> {
             operator fun provideDelegate(ref: Storage, prop: KProperty<*>): T
         }
 
-        interface Single<T> : Property {
+        interface Single<T> : Property<Single<T>> {
 
             suspend fun get(): T
             suspend infix fun <U> get(getter: Getter<T, U>) = getter.view(get())
@@ -30,14 +33,12 @@ interface Storage {
             suspend fun <U> set(setter: Lens.Simple<T, U>, value: U) = update(setter) { value }
             suspend infix fun set(value: T)
 
-            operator fun getValue(ref: Any?, prop: KProperty<*>) = this
         }
 
-        interface Collection<T> : Property, Flow<T> {
+        interface Collection<T> : Property<Collection<T>>, Flow<T> {
 
             suspend fun size(): Int
 
-            operator fun getValue(ref: Any?, prop: KProperty<*>) = this
         }
 
         interface Map<K, V> : Collection<Pair<K, V>> {
@@ -48,14 +49,12 @@ interface Storage {
             suspend fun keys(): Flow<K>
             suspend fun values(): Flow<V>
 
-            override operator fun getValue(ref: Any?, prop: KProperty<*>) = this
         }
 
         interface List<T> : Map<Int, T> {
 
             suspend fun add(element: T)
 
-            override operator fun getValue(ref: Any?, prop: KProperty<*>) = this
         }
 
 

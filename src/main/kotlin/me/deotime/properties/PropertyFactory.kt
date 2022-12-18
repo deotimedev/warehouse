@@ -16,7 +16,7 @@ internal object PropertyFactory {
     fun <K, V> createMap(keyType: KType, valueKType: KType): Storage.Property.Delegate<Storage.Property.Map<K, V>> =
         PropertyInitializer.Map(keyType, valueKType)
 
-    internal sealed interface PropertyInitializer<T, P : Storage.Property> : Storage.Property.Delegate<P> {
+    internal sealed interface PropertyInitializer<T, P : Storage.Property<*>> : Storage.Property.Delegate<P> {
         override fun provideDelegate(ref: Storage, prop: KProperty<*>) = construct(prop.name, ref)
 
         fun construct(name: String, storage: Storage): P
@@ -36,8 +36,11 @@ internal object PropertyFactory {
             override fun construct(name: String, storage: Storage) = ListPropertyImpl(name, storage, type.serializer)
         }
 
+
         class Map<K, V>(private val keyType: KType, private val valueKType: KType) :
             PropertyInitializer<Nothing, Storage.Property.Map<K, V>> {
+
+            @Suppress("UNCHECKED_CAST")
             override fun construct(name: String, storage: Storage) =
                 MapPropertyImpl(
                     name,
