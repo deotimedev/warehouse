@@ -17,33 +17,34 @@ internal open class MapPropertyImpl<K, V>(
 ) : Storage.Property.Map<K, V>, CollectionPropertyImpl<Pair<K, V>>(name, storage, mapPropertySerializer()) {
 
     override suspend fun get(key: K) = sync {
-        File(location, keySerializer.serialize(key)).takeIf { it.exists() }?.let { valueKSerializer.deserialize(it) }
+        File(location, "${key.hashCode()}").takeIf { it.exists() }?.let { valueKSerializer.deserialize(File(it, "value")) }
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun set(key: K, value: V?): Unit = sync {
-        val name = keySerializer.serialize(key)
+        val hash = key.hashCode()
         value?.let {
-            File(location, name)
-                .apply { createNewFile() }
-                .writeText(valueKSerializer.serialize(it))
-        } ?: File(location, name).takeIf { it.exists() }?.delete()
+            val entry = File(location, "$hash").apply { mkdirs() }
+            File(entry, "key").writeText(keySerializer.serialize(key))
+            File(entry, "value").writeText(valueKSerializer.serialize(it))
+        } ?: File(location, "$hash").takeIf { it.exists() }?.delete()
     }
 
     override suspend fun keys() = sync {
         flow {
-            for(item in location.listFiles().orEmpty()) emit(keySerializer.deserialize(item.name))
+            for(item in location.listFiles().orEmpty()) emit(keySerializer.deserialize(File(item, "key")))
         }
     }
 
     override suspend fun values() = sync {
         flow {
-            for(item in location.listFiles().orEmpty()) emit(valueKSerializer.deserialize(item))
+            for(item in location.listFiles().orEmpty()) emit(valueKSerializer.deserialize(File(item, "value")))
         }
     }
 
 
     companion object {
+
 
         // THIS WILL NEVER BE USED
         @Suppress("UNCHECKED_CAST")
