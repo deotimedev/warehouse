@@ -3,6 +3,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import me.deotime.AppdataStorage
 import me.deotime.property
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.test.Test
 
 class TestStorageProperties {

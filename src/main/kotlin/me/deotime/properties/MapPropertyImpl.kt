@@ -22,7 +22,7 @@ internal open class MapPropertyImpl<K, V>(
 
     @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun set(key: K, value: V?): Unit = sync {
-        keySerializer.serialize(key)
+        val name = keySerializer.serialize(key)
         value?.let {
             File(location, name)
                 .apply { createNewFile() }
