@@ -80,7 +80,7 @@ inline fun <reified T> Storage.list() = list<T>(typeOf<T>())
 inline fun <reified K, reified V> Storage.map() = map<K, V>(typeOf<K>(), typeOf<V>())
 
 
-suspend inline fun <T, U> Storage.Property.Single<T>.update(lens: Lens.Simple<T, U>, closure: (U) -> U): Unit =
+suspend inline fun <T, U> Storage.Property.Single<T>.update(lens: Lens.Simple<T, U>, closure: (U) -> U): Storage.Update<T> =
     get().let { Storage.Update(it, lens.set(it, lens.view(it).let(closure)).also { set(it) }) }
 
 suspend inline infix fun <T> Storage.Property.Single<T>.update(closure: (T) -> T) = update(Lens.id(), closure)
