@@ -1,5 +1,7 @@
 package me.deotime.properties
 
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
@@ -7,22 +9,39 @@ import kotlinx.serialization.encoding.Encoder
 import me.deotime.Storage
 import java.io.File
 
-internal class MapPropertyImpl<K, V>(
+internal open class MapPropertyImpl<K, V>(
     override val name: String,
     override val storage: Storage,
     private val keySerializer: KSerializer<K>,
     private val valueKSerializer: KSerializer<V>
 ) : Storage.Property.Map<K, V>, CollectionPropertyImpl<Pair<K, V>>(name, storage, mapPropertySerializer()) {
+
     override suspend fun get(key: K) = sync {
         File(location, keySerializer.serialize(key)).takeIf { it.exists() }?.let { valueKSerializer.deserialize(it) }
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun set(key: K, value: V?): Unit = sync {
-        val name = keySerializer.serialize(key)
+        keySerializer.serialize(key)
         value?.let {
-            putItem(name, valueKSerializer.serialize(it))
+            File(location, name)
+                .apply { createNewFile() }
+                .writeText(valueKSerializer.serialize(it))
         } ?: File(location, name).takeIf { it.exists() }?.delete()
     }
+
+    override suspend fun keys() = sync {
+        flow {
+            for(item in location.listFiles().orEmpty()) emit(keySerializer.deserialize(item.name))
+        }
+    }
+
+    override suspend fun values() = sync {
+        flow {
+            for(item in location.listFiles().orEmpty()) emit(valueKSerializer.deserialize(item))
+        }
+    }
+
 
     companion object {
 

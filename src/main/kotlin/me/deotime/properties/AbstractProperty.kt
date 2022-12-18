@@ -18,8 +18,11 @@ internal abstract class AbstractProperty<T> {
     protected val location by lazy { File(File(storage.root, storage.name), name) }
 
     protected suspend fun <R> sync(closure: suspend () -> R) =
-        withContext(Dispatchers.IO) { mutex.withLock { closure() } }
+        withContext(Dispatchers.IO) {
+            mutex.withLock { closure() }
+        }
 
     protected fun <A> KSerializer<A>.serialize(value: A) = Json.encodeToString(this, value)
-    fun <A> KSerializer<A>.deserialize(data: File) = Json.decodeFromString(this, data.readText())
+    fun <A> KSerializer<A>.deserialize(data: File) = deserialize(data.readText())
+    fun <A> KSerializer<A>.deserialize(data: String) = Json.decodeFromString(this, data)
 }

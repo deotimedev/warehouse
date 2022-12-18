@@ -10,8 +10,8 @@ internal object PropertyFactory {
     fun <T> createProperty(type: KType, default: T): Storage.Property.Delegate<Storage.Property.Single<T>> =
         PropertyInitializer.Single(type, default)
 
-    fun <T> createCollection(type: KType): Storage.Property.Delegate<Storage.Property.Collection<T>> =
-        PropertyInitializer.Collection(type)
+    fun <T> createList(type: KType): Storage.Property.Delegate<Storage.Property.List<T>> =
+        PropertyInitializer.List(type)
 
     fun <K, V> createMap(keyType: KType, valueKType: KType): Storage.Property.Delegate<Storage.Property.Map<K, V>> =
         PropertyInitializer.Map(keyType, valueKType)
@@ -32,9 +32,8 @@ internal object PropertyFactory {
                 SinglePropertyImpl(name, storage, type.serializer, default)
         }
 
-        class Collection<T>(private val type: KType) : PropertyInitializer<T, Storage.Property.Collection<T>> {
-            override fun construct(name: String, storage: Storage) =
-                CollectionPropertyImpl(name, storage, type.serializer)
+        class List<T>(private val type: KType) : PropertyInitializer<T, Storage.Property.List<T>> {
+            override fun construct(name: String, storage: Storage) = ListPropertyImpl(name, storage, type.serializer)
         }
 
         class Map<K, V>(private val keyType: KType, private val valueKType: KType) :
