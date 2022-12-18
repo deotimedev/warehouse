@@ -35,13 +35,13 @@ interface Storage {
 
         }
 
-        interface Collection<T> : Property<Collection<T>>, Flow<T> {
+        interface Collection<T> : Flow<T> {
 
             suspend fun size(): Int
 
         }
 
-        interface Map<K, V> : Collection<Pair<K, V>> {
+        interface Map<K, V> : Property<Map<K, V>>, Collection<Pair<K, V>> {
 
             suspend infix fun get(key: K): V?
             suspend fun set(key: K, value: V?)
@@ -51,9 +51,10 @@ interface Storage {
 
         }
 
-        interface List<T> : Map<Int, T> {
+        interface List<T> : Property<List<T>> {
 
             suspend fun add(element: T)
+            suspend fun get(index: Int): T?
 
         }
 

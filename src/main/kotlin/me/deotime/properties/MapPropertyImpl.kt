@@ -1,7 +1,10 @@
 package me.deotime.properties
 
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.zip
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
@@ -9,7 +12,7 @@ import kotlinx.serialization.encoding.Encoder
 import me.deotime.Storage
 import java.io.File
 
-internal open class MapPropertyImpl<K, V>(
+internal class MapPropertyImpl<K, V>(
     override val name: String,
     override val storage: Storage,
     private val keySerializer: KSerializer<K>,
@@ -40,6 +43,10 @@ internal open class MapPropertyImpl<K, V>(
         flow {
             for(item in location.listFiles().orEmpty()) emit(valueKSerializer.deserialize(File(item, "value")))
         }
+    }
+
+    override suspend fun collect(collector: FlowCollector<Pair<K, V>>) {
+        flow { emitAll(keys().zip(values()) { a, b -> a to b }) }.collect(collector)
     }
 
 

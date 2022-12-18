@@ -13,11 +13,6 @@ internal abstract class CollectionPropertyImpl<T>(
     private val serializer: KSerializer<T>
 ) : Storage.Property.Collection<T>, AbstractProperty<T>() {
 
-
-    init {
-        location.mkdirs()
-    }
-
     override suspend fun size() = sync { location.list()?.size ?: 0 }
 
     override suspend fun collect(collector: FlowCollector<T>) = sync {

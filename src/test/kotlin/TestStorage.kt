@@ -2,15 +2,31 @@ import co.q64.raindrop.annotation.Generate
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import me.deotime.AppdataStorage
+import me.deotime.map
 import me.deotime.property
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
+import kotlin.random.Random
 import kotlin.test.Test
 
 class TestStorageProperties {
 
     @Test
     fun testSingle() = runBlocking {
-        println(TestStorage.Username.get())
+        println("Old username: ${TestStorage.Username.get()}")
+        TestStorage.Username set UUID.randomUUID().toString()
+        println("New username: ${TestStorage.Username.get()}")
+    }
+
+    @Test
+    fun testMap() = runBlocking {
+        TestStorage.Items.collect { println("Old Item: $it") }
+        TestStorage.Items.set("Burger", Random.nextInt(1, 20))
+        TestStorage.Items.set("Waffle", Random.nextInt(1, 20))
+        TestStorage.Items.set("Cake", Random.nextInt(1, 20))
+        println("Amount of burger: ${TestStorage.Items.get("Burger")}")
+        println("Amount of waffle: ${TestStorage.Items.get("Waffle")}")
+        println("Amount of cake: ${TestStorage.Items.get("Cake")}")
     }
 
 
@@ -24,7 +40,9 @@ object TestStorage : AppdataStorage {
     override val name = "TestStorage"
 
     val Username by property("Unknown!")
+    val Items by map<String, Int>()
     val Complex by property(Complex())
+
 
 }
 
