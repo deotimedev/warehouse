@@ -9,7 +9,7 @@ internal class SinglePropertyImpl<T>(
     override val storage: Storage,
     private val serializer: KSerializer<T>,
     private val default: T
-) : Storage.Property.Single<T>, AbstractProperty<T>() {
+) : Storage.Property.Single<T>, AbstractProperty() {
 
     init {
         location.apply {
