@@ -90,11 +90,12 @@ interface Storage {
 }
 
 
-fun <T> Storage.property(type: KType, default: T) = PropertyFactory.createProperty(type, default)
+fun <T> Storage.property(type: KType, default: () -> T) = PropertyFactory.createProperty(type, default)
 fun <T> Storage.list(type: KType) = PropertyFactory.createList<T>(type)
 fun <K, V> Storage.map(keyType: KType, valueType: KType) = PropertyFactory.createMap<K, V>(keyType, valueType)
 
 inline fun <reified T> Storage.property() = property<T?>(null)
-inline fun <reified T> Storage.property(default: T) = property(typeOf<T>(), default)
+inline fun <reified T> Storage.property(default: T) = property(typeOf<T>()) { default }
+inline fun <reified T> Storage.property(noinline default: () -> T) = property(typeOf<T>(), default)
 inline fun <reified T> Storage.list() = list<T>(typeOf<T>())
 inline fun <reified K, reified V> Storage.map() = map<K, V>(typeOf<K>(), typeOf<V>())

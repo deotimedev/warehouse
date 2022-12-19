@@ -8,7 +8,7 @@ internal class SinglePropertyImpl<T>(
     override val name: String,
     override val storage: Storage,
     private val serializer: KSerializer<T>,
-    private val default: T
+    private val default: () -> T
 ) : Storage.Property.Single<T>, AbstractProperty() {
 
     init {
@@ -16,7 +16,7 @@ internal class SinglePropertyImpl<T>(
             if (!exists()) {
                 if (!parentFile.exists()) parentFile.mkdirs()
                 createNewFile()
-                write(default)
+                write(default())
             }
         }
     }

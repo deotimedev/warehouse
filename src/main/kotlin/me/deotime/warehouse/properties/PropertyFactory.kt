@@ -7,7 +7,7 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 
 internal object PropertyFactory {
-    fun <T> createProperty(type: KType, default: T): Storage.Property.Delegate<Storage.Property.Single<T>> =
+    fun <T> createProperty(type: KType, default: () -> T): Storage.Property.Delegate<Storage.Property.Single<T>> =
         PropertyInitializer.Single(type, default)
 
     fun <T> createList(type: KType): Storage.Property.Delegate<Storage.Property.List<T>> =
@@ -26,7 +26,7 @@ internal object PropertyFactory {
             get() = serializer(this) as KSerializer<T>
 
 
-        class Single<T>(private val type: KType, private val default: T) :
+        class Single<T>(private val type: KType, private val default: () -> T) :
             PropertyInitializer<T, Storage.Property.Single<T>> {
             override fun construct(name: String, storage: Storage) =
                 SinglePropertyImpl(name, storage, type.serializer, default)
