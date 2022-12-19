@@ -5,10 +5,12 @@ import java.io.File
 interface AppdataStorage : Storage {
 
     override val root: String
-        get() = AppdataDirectory
+        get() = AppdataDirectory ?: error("Appdata directory could not be found.")
 
     companion object {
-        val AppdataDirectory = System.getenv("APPDATA") + File.separator
+        internal val AppdataDirectory = runCatching {
+            System.getenv("APPDATA") + File.separator
+        }.getOrNull()
     }
 
 }

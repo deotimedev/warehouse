@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 import me.deotime.warehouse.Storage
 import java.io.File
 
-internal abstract class AbstractProperty<T> {
+internal abstract class AbstractProperty : Storage.Property.Collection {
 
     abstract val name: String
     abstract val storage: Storage
@@ -19,6 +19,9 @@ internal abstract class AbstractProperty<T> {
         File(File(storage.root, storage.name), name)
     }
 
+    fun files() = location.listFiles()?.toList().orEmpty()
+
+    override suspend fun size() = sync { files().size }
     protected suspend fun <R> sync(closure: suspend () -> R) =
         withContext(Dispatchers.IO) {
             mutex.withLock { closure() }

@@ -1,7 +1,7 @@
 package me.deotime.warehouse
 
 import co.q64.raindrop.optics.Getter
-import co.q64.raindrop.optics.Lens
+import co.q64.raindrop.optics.Setter
 import kotlinx.coroutines.flow.Flow
 import me.deotime.warehouse.properties.PropertyFactory
 import kotlin.reflect.KProperty
@@ -28,30 +28,49 @@ interface Storage {
         interface Single<T> : Property<Single<T>> {
 
             suspend fun get(): T
-            suspend infix fun <U> get(getter: Getter<T, U>) = getter.view(get())
-
-            suspend fun <U> set(setter: Lens.Simple<T, U>, value: U) = update(setter) { value }
             suspend infix fun set(value: T)
+            suspend infix fun update(closure: (T) -> T) = get().let {
+                val update = closure(it)
+                set(update)
+                Update(it, update)
+            }
+
+
+            suspend infix fun <U> get(getter: Getter<T, U>) = getter.view(get())
+            suspend fun <U> set(setter: Setter.Simple<T, U>, value: U) = update(setter) { value }
+            suspend fun <U> update(setter: Setter.Simple<T, U>, closure: (U) -> U) = update { setter.over(it, closure) }
 
         }
 
-        interface Collection<T> : Flow<T> {
-
+        interface Collection {
             suspend fun size(): Int
-
         }
 
-        interface Map<K, V> : Property<Map<K, V>>, Collection<Pair<K, V>> {
+        interface Map<K, V> : Property<Map<K, V>>, Flow<Pair<K, V>>, Collection {
 
             suspend infix fun get(key: K): V?
+            suspend fun get(key: K, default: () -> V) = get(key) ?: default().also { set(key, it) }
             suspend fun set(key: K, value: V?)
+            suspend fun update(key: K, closure: (V?) -> V?) = get(key).let {
+                val update = closure(it)
+                set(key, update)
+                Update(it, update)
+            }
+
+            suspend fun update(key: K, default: () -> V, closure: (V) -> V) = update(key) { closure((it ?: default())) }
+
+            suspend fun <U> get(key: K, getter: Getter.With.Empty<V, U>) =
+                get(key) { getter.empty().empty() }.let { getter.view(it) }
+
+            suspend fun <U> update(key: K, setter: Setter.With.Empty.Simple<V, U>, closure: (U) -> U) =
+                update(key, { setter.empty().empty() }) { setter.over(it, closure) }
 
             suspend fun keys(): Flow<K>
             suspend fun values(): Flow<V>
 
         }
 
-        interface List<T> : Property<List<T>> {
+        interface List<T> : Property<List<T>>, Flow<T>, Collection {
 
             suspend fun add(element: T)
             suspend fun get(index: Int): T?
@@ -79,9 +98,3 @@ inline fun <reified T> Storage.property() = property<T?>(null)
 inline fun <reified T> Storage.property(default: T) = property(typeOf<T>(), default)
 inline fun <reified T> Storage.list() = list<T>(typeOf<T>())
 inline fun <reified K, reified V> Storage.map() = map<K, V>(typeOf<K>(), typeOf<V>())
-
-
-suspend inline fun <T, U> Storage.Property.Single<T>.update(lens: Lens.Simple<T, U>, closure: (U) -> U): Storage.Update<T> =
-    get().let { Storage.Update(it, lens.set(it, lens.view(it).let(closure)).also { set(it) }) }
-
-suspend inline infix fun <T> Storage.Property.Single<T>.update(closure: (T) -> T) = update(Lens.id(), closure)

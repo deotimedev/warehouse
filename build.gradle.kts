@@ -26,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
 
     // optics / algebra
-    implementation("co.q64.rain:raindrop:1.19-SNAPSHOT")
+    implementation("co.q64.rain:raindrop:1.20-SNAPSHOT")
 }
 
 tasks.test {

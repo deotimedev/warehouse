@@ -13,8 +13,8 @@ internal class SinglePropertyImpl<T>(
 
     init {
         location.apply {
-            if(!exists()) {
-                if(!parentFile.exists()) parentFile.mkdirs()
+            if (!exists()) {
+                if (!parentFile.exists()) parentFile.mkdirs()
                 createNewFile()
                 write(default)
             }

@@ -1,14 +1,10 @@
 package me.deotime.warehouse.properties
 
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.zip
 import kotlinx.serialization.KSerializer
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
 import me.deotime.warehouse.Storage
 import java.io.File
 
@@ -17,10 +13,11 @@ internal class MapPropertyImpl<K, V>(
     override val storage: Storage,
     private val keySerializer: KSerializer<K>,
     private val valueKSerializer: KSerializer<V>
-) : Storage.Property.Map<K, V>, CollectionPropertyImpl<Pair<K, V>>(name, storage, mapPropertySerializer()) {
+) : Storage.Property.Map<K, V>, AbstractProperty() {
 
     override suspend fun get(key: K) = sync {
-        File(location, "${key.hashCode()}").takeIf { it.exists() }?.let { valueKSerializer.deserialize(File(it, "value")) }
+        File(location, "${key.hashCode()}").takeIf { it.exists() }
+            ?.let { valueKSerializer.deserialize(File(it, "value")) }
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
@@ -35,13 +32,13 @@ internal class MapPropertyImpl<K, V>(
 
     override suspend fun keys() = sync {
         flow {
-            for(item in location.listFiles().orEmpty()) emit(keySerializer.deserialize(File(item, "key")))
+            for (item in location.listFiles().orEmpty()) emit(keySerializer.deserialize(File(item, "key")))
         }
     }
 
     override suspend fun values() = sync {
         flow {
-            for(item in location.listFiles().orEmpty()) emit(valueKSerializer.deserialize(File(item, "value")))
+            for (item in location.listFiles().orEmpty()) emit(valueKSerializer.deserialize(File(item, "value")))
         }
     }
 
@@ -49,17 +46,4 @@ internal class MapPropertyImpl<K, V>(
         flow { emitAll(keys().zip(values()) { a, b -> a to b }) }.collect(collector)
     }
 
-
-    companion object {
-
-
-        // THIS WILL NEVER BE USED
-        @Suppress("UNCHECKED_CAST")
-        private fun <K, V> mapPropertySerializer() = object : KSerializer<Nothing> {
-            override val descriptor: SerialDescriptor get() = error("Map cannot be serialized normally.")
-            override fun serialize(encoder: Encoder, value: Nothing) = error("Map can not be serialized normally.")
-            override fun deserialize(decoder: Decoder) = error("Map can not be deserialized normally.")
-        } as KSerializer<Pair<K, V>>
-
-    }
 }
