@@ -23,11 +23,11 @@ internal class ListPropertyImpl<T>(
     }
 
     override suspend fun get(index: Int) =
-        sync { location.listFiles()?.getOrNull(0)?.let { serializer.deserialize(it) } }
+        sync { files().getOrNull(0)?.let { serializer.deserialize(it) } }
 
     override suspend fun collect(collector: FlowCollector<T>) = sync {
         flow {
-            for (item in location.listFiles().orEmpty()) emit(serializer.deserialize(item))
+            for (item in files()) emit(serializer.deserialize(item))
         }.collect(collector)
     }
 }

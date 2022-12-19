@@ -32,13 +32,13 @@ internal class MapPropertyImpl<K, V>(
 
     override suspend fun keys() = sync {
         flow {
-            for (item in location.listFiles().orEmpty()) emit(keySerializer.deserialize(File(item, "key")))
+            for (item in files()) emit(keySerializer.deserialize(File(item, "key")))
         }
     }
 
     override suspend fun values() = sync {
         flow {
-            for (item in location.listFiles().orEmpty()) emit(valueKSerializer.deserialize(File(item, "value")))
+            for (item in files()) emit(valueKSerializer.deserialize(File(item, "value")))
         }
     }
 
