@@ -7,13 +7,11 @@ plugins {
 }
 
 group = "me.deotime"
-version = "1.0-SNAPSHOT"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
-    maven {
-        url = uri("https://repo.q64.io/rain-public")
-    }
+    maven { url = uri("https://repo.q64.io/rain-public") }
 }
 
 dependencies {
@@ -39,7 +37,7 @@ publishing {
             groupId = "me.deotime.warehouse"
             artifactId = "warehouse"
             version = "1.0.0"
-            from(components["kotlin"])
+            from(components["java"])
 
             pom {
                 name.set("warehouse")
