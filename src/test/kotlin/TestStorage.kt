@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import me.deotime.warehouse.AppdataStorage
 import me.deotime.warehouse.map
 import me.deotime.warehouse.property
+import me.deotime.warehouse.provided.WindowsStorage
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.random.Random
@@ -36,7 +37,7 @@ class TestStorageProperties {
     }
 }
 
-object TestStorage : AppdataStorage {
+object TestStorage : WindowsStorage.Appdata {
     override val name = "TestStorage"
 
     val Username by property("Unknown!")
