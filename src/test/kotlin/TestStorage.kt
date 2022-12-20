@@ -1,7 +1,6 @@
 import co.q64.raindrop.annotation.Generate
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
-import me.deotime.warehouse.AppdataStorage
 import me.deotime.warehouse.map
 import me.deotime.warehouse.property
 import me.deotime.warehouse.provided.WindowsStorage
