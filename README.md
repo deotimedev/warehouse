@@ -1,6 +1,8 @@
 # warehouse
 
 A fast, thread-safe, couroutine based local storage tool.
+This project is currently limited by the lack of suspending property get/set
+See: https://youtrack.jetbrains.com/issue/KT-15555
 
 ```kotlin
 object TestWarehouse : WindowsWarehouse.Appdata /* Stores files in AppData directory */ {
