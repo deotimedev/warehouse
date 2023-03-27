@@ -1,15 +1,15 @@
 package me.deotime.warehouse.properties
 
 import kotlinx.serialization.KSerializer
-import me.deotime.warehouse.Storage
+import me.deotime.warehouse.Warehouse
 import java.io.File
 
 internal class SinglePropertyImpl<T>(
     override val name: String,
-    override val storage: Storage,
+    override val warehouse: Warehouse,
     private val serializer: KSerializer<T>,
     private val default: () -> T
-) : Storage.Property.Single<T>, AbstractProperty() {
+) : Warehouse.Property.Single<T>, AbstractProperty() {
 
     init {
         location.apply {

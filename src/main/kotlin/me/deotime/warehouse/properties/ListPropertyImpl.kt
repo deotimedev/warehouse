@@ -4,15 +4,15 @@ import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
-import me.deotime.warehouse.Storage
+import me.deotime.warehouse.Warehouse
 
 internal class ListPropertyImpl<T>(
     override val name: String,
-    override val storage: Storage,
+    override val warehouse: Warehouse,
     private val serializer: KSerializer<T>
-) : Storage.Property.List<T>, AbstractProperty() {
+) : Warehouse.Property.List<T>, AbstractProperty() {
 
-    private val delegate = MapPropertyImpl<Int, T>(name, storage, serializer(), serializer)
+    private val delegate = MapPropertyImpl<Int, T>(name, warehouse, serializer(), serializer)
 
     // this might go really badly
     private suspend fun index() =

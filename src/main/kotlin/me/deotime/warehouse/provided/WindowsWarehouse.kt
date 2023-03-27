@@ -1,6 +1,6 @@
 package me.deotime.warehouse.provided
 
-import me.deotime.warehouse.Storage
+import me.deotime.warehouse.Warehouse
 import java.io.File
 
 internal object WindowsEnvironment {
@@ -11,29 +11,29 @@ internal object WindowsEnvironment {
     const val User = "HOMEPATH"
 }
 
-sealed interface WindowsStorage : Storage {
+sealed interface WindowsWarehouse : Warehouse {
     val env: String
     override val root get() = runCatching {
         System.getenv(env) + File.separator
     }.getOrElse { error("No environment variable found for directory $env. Note that this storage type only works on Windows operating systems.") }
 
-    interface Appdata : WindowsStorage {
+    interface Appdata : WindowsWarehouse {
         override val env get() = WindowsEnvironment.Appdata
     }
 
-    interface ProgramData : WindowsStorage {
+    interface ProgramData : WindowsWarehouse {
         override val env get() = WindowsEnvironment.ProgramData
     }
 
-    interface ProgramFiles : WindowsStorage {
+    interface ProgramFiles : WindowsWarehouse {
         override val env: String get() = WindowsEnvironment.ProgramFiles
     }
 
-    interface ProgramFilesx86 : WindowsStorage {
+    interface ProgramFilesx86 : WindowsWarehouse {
         override val env: String get() = WindowsEnvironment.ProgramFilesx86
     }
 
-    interface User : WindowsStorage {
+    interface User : WindowsWarehouse {
         override val env: String get() = WindowsEnvironment.User
     }
 }

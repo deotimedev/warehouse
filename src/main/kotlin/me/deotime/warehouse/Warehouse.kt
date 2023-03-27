@@ -8,7 +8,7 @@ import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
 
-interface Storage {
+interface Warehouse {
 
     val root: String
     val name: String
@@ -16,18 +16,19 @@ interface Storage {
     sealed interface Property<Self : Property<Self>> {
 
         val name: String
-        val storage: Storage
+        val warehouse: Warehouse
 
         @Suppress("UNCHECKED_CAST")
         operator fun getValue(ref: Any?, prop: KProperty<*>) = this as Self
 
         interface Delegate<T : Property<*>> {
-            operator fun provideDelegate(ref: Storage, prop: KProperty<*>): T
+            operator fun provideDelegate(ref: Warehouse, prop: KProperty<*>): T
         }
 
         interface Single<T> : Property<Single<T>> {
 
             suspend fun get(): T
+            suspend operator fun invoke() = get()
             suspend infix fun set(value: T)
             suspend infix fun update(closure: (T) -> T) = get().let {
                 val update = closure(it)
@@ -75,6 +76,8 @@ interface Storage {
             suspend fun add(element: T)
             suspend fun get(index: Int): T?
 
+            suspend operator fun plusAssign(element: T) = add(element)
+
         }
 
 
@@ -90,12 +93,12 @@ interface Storage {
 }
 
 
-fun <T> Storage.property(type: KType, default: () -> T) = PropertyFactory.createProperty(type, default)
-fun <T> Storage.list(type: KType) = PropertyFactory.createList<T>(type)
-fun <K, V> Storage.map(keyType: KType, valueType: KType) = PropertyFactory.createMap<K, V>(keyType, valueType)
+fun <T> Warehouse.property(type: KType, default: () -> T) = PropertyFactory.createProperty(type, default)
+fun <T> Warehouse.list(type: KType) = PropertyFactory.createList<T>(type)
+fun <K, V> Warehouse.map(keyType: KType, valueType: KType) = PropertyFactory.createMap<K, V>(keyType, valueType)
 
-inline fun <reified T> Storage.property() = property<T?>(null)
-inline fun <reified T> Storage.property(default: T) = property(typeOf<T>()) { default }
-inline fun <reified T> Storage.property(noinline default: () -> T) = property(typeOf<T>(), default)
-inline fun <reified T> Storage.list() = list<T>(typeOf<T>())
-inline fun <reified K, reified V> Storage.map() = map<K, V>(typeOf<K>(), typeOf<V>())
+inline fun <reified T> Warehouse.property() = property<T?>(null)
+inline fun <reified T> Warehouse.property(default: T) = property(typeOf<T>()) { default }
+inline fun <reified T> Warehouse.property(noinline default: () -> T) = property(typeOf<T>(), default)
+inline fun <reified T> Warehouse.list() = list<T>(typeOf<T>())
+inline fun <reified K, reified V> Warehouse.map() = map<K, V>(typeOf<K>(), typeOf<V>())

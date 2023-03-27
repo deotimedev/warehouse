@@ -6,17 +6,17 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
-import me.deotime.warehouse.Storage
+import me.deotime.warehouse.Warehouse
 import java.io.File
 
-internal abstract class AbstractProperty : Storage.Property.Collection {
+internal abstract class AbstractProperty : Warehouse.Property.Collection {
 
     abstract val name: String
-    abstract val storage: Storage
+    abstract val warehouse: Warehouse
 
     private val mutex = Mutex()
     protected val location by lazy {
-        File(File(storage.root, storage.name), name)
+        File(File(warehouse.root, warehouse.name), name)
     }
 
     fun files() = location.listFiles()?.toList().orEmpty()
