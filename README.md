@@ -17,7 +17,7 @@ suspend fun main() {
     TestWarehouse.Username set UUID.randomUUID().toString()
     println("New username: ${TestWarehouse.Username()}")
 
-    // Use a ilst of items
+    // Use a list of friends
     println("${TestWarehouse.Username()} has ${TestWarehouse.Friends.size()} friends")
     println("They are:")
     TestWarehouse.Friends.collect { println(" - $it") }
