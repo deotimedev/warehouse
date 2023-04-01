@@ -5,21 +5,16 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.serializer
 import me.deotime.warehouse.Warehouse
+import java.io.File
 
 internal class ListPropertyImpl<T>(
     override val name: String,
     override val warehouse: Warehouse,
     private val serializer: KSerializer<T>
-) : Warehouse.Property.List<T>, AbstractProperty() {
-
-    private val delegate = MapPropertyImpl<Int, T>(name, warehouse, serializer(), serializer)
-
-    // this might go really badly
-    private suspend fun index() =
-        sync { location.listFiles()?.getOrNull((delegate.files().size - 1).coerceAtMost(0))?.name?.toIntOrNull() ?: 0 }
+) : Warehouse.Property.List<T>, AbstractCollectionProperty<T>() {
 
     override suspend fun add(element: T) {
-        delegate.set(index(), element)
+        File(location, "${size()}").writeText(serializer.serialize(element))
     }
 
     override suspend fun get(index: Int) =

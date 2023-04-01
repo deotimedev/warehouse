@@ -13,21 +13,21 @@ internal class MapPropertyImpl<K, V>(
     override val warehouse: Warehouse,
     private val keySerializer: KSerializer<K>,
     private val valueKSerializer: KSerializer<V>
-) : Warehouse.Property.Map<K, V>, AbstractProperty() {
+) : Warehouse.Property.Map<K, V>, AbstractCollectionProperty<Pair<K, V>>() {
 
     override suspend fun get(key: K) = sync {
         File(location, "${key.hashCode()}").takeIf { it.exists() }
             ?.let { valueKSerializer.deserialize(File(it, "value")) }
     }
 
-    @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun set(key: K, value: V?): Unit = sync {
         val hash = key.hashCode()
+        val file = File(location, "$hash")
         value?.let {
-            val entry = File(location, "$hash").apply { mkdirs() }
+            val entry = file.apply { mkdirs() }
             File(entry, "key").writeText(keySerializer.serialize(key))
             File(entry, "value").writeText(valueKSerializer.serialize(it))
-        } ?: File(location, "$hash").takeIf { it.exists() }?.delete()
+        } ?: file.takeIf { it.exists() }?.delete()
     }
 
     override suspend fun keys() = sync {
@@ -43,7 +43,8 @@ internal class MapPropertyImpl<K, V>(
     }
 
     override suspend fun collect(collector: FlowCollector<Pair<K, V>>) {
-        flow { emitAll(keys().zip(values()) { a, b -> a to b }) }.collect(collector)
+        flow { emitAll(keys().zip(values()) { a, b -> a to b }) }
+            .collect(collector)
     }
 
 }

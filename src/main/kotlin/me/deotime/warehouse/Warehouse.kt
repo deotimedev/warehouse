@@ -43,11 +43,11 @@ interface Warehouse {
 
         }
 
-        interface Collection {
+        interface Collection<I> : Flow<I> {
             suspend fun size(): Int
         }
 
-        interface Map<K, V> : Property<Map<K, V>>, Flow<Pair<K, V>>, Collection {
+        interface Map<K, V> : Property<Map<K, V>>, Collection<Pair<K, V>> {
 
             suspend infix fun get(key: K): V?
             suspend fun get(key: K, default: () -> V) = get(key) ?: default().also { set(key, it) }
@@ -71,13 +71,12 @@ interface Warehouse {
 
         }
 
-        interface List<T> : Property<List<T>>, Flow<T>, Collection {
+        interface List<T> : Property<List<T>>, Collection<T> {
 
             suspend fun add(element: T)
             suspend fun get(index: Int): T?
 
             suspend operator fun plusAssign(element: T) = add(element)
-
         }
 
 
