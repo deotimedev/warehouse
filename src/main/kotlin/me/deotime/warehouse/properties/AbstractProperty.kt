@@ -8,16 +8,21 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import me.deotime.warehouse.Warehouse
+import me.deotime.warehouse.util.ReentrantMutex
+import me.deotime.warehouse.util.createIfNotExists
 import java.io.File
 
 internal abstract class AbstractProperty {
 
     abstract val name: String
     abstract val warehouse: Warehouse
+    open val directory = false
 
-    private val mutex = Mutex()
+    private val mutex = ReentrantMutex()
     protected val location by lazy {
-        File(File(warehouse.root, warehouse.name), name)
+        val warehouse = File(warehouse.root, warehouse.name)
+        warehouse.createIfNotExists(directory = true)
+        File(warehouse, name).apply { createIfNotExists(directory = this@AbstractProperty.directory) }
     }
 
     fun files() = location.listFiles()?.toList().orEmpty()

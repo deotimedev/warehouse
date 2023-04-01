@@ -11,7 +11,7 @@ import kotlin.reflect.typeOf
 interface Warehouse {
 
     val root: String
-    val name: String
+    val name: String get() = this::class.java.simpleName
 
     sealed interface Property<Self : Property<Self>> {
 
@@ -43,16 +43,18 @@ interface Warehouse {
 
         }
 
-        interface Collection<I> : Flow<I> {
+        interface Collection<K, I> : Flow<I> {
             suspend fun size(): Int
+            suspend fun remove(at: K): Boolean
+            suspend fun clear()
         }
 
-        interface Map<K, V> : Property<Map<K, V>>, Collection<Pair<K, V>> {
+        interface Map<K, V> : Property<Map<K, V>>, Collection<K, Pair<K, V>> {
 
             suspend infix fun get(key: K): V?
             suspend fun get(key: K, default: () -> V) = get(key) ?: default().also { set(key, it) }
-            suspend fun set(key: K, value: V?)
-            suspend fun update(key: K, closure: (V?) -> V?) = get(key).let {
+            suspend fun set(key: K, value: V)
+            suspend fun update(key: K, closure: (V) -> V) = get(key)?.let {
                 val update = closure(it)
                 set(key, update)
                 Update(it, update)
@@ -71,12 +73,14 @@ interface Warehouse {
 
         }
 
-        interface List<T> : Property<List<T>>, Collection<T> {
+        interface List<T> : Property<List<T>>, Collection<Int, T> {
 
             suspend fun add(element: T)
+            suspend fun add(vararg elements: T) = elements.forEach { add(it) }
             suspend fun get(index: Int): T?
 
             suspend operator fun plusAssign(element: T) = add(element)
+            suspend operator fun plusAssign(elements: Iterable<T>) = elements.forEach { add(it) }
         }
 
 
