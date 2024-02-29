@@ -24,13 +24,13 @@ suspend fun main() {
     // Use a list of friends
     println("${TestWarehouse.Username()} has ${TestWarehouse.Friends.size()} friends")
     println("They are:")
-    TestWarehouse.Friends.collect { println(" - $it") }
+    TestWarehouse.Friends.items().forEach { println(" - $it") }
     val newFriend = listOf("joe", "bob", "sally").random()
     println("Made a new friend: $newFriend!")
     TestWarehouse.Friends += newFriend
 
     // Dynamic map of items
-    TestWarehouse.Items.collect { println("Old Item: $it") }
+    TestWarehouse.Items.items().forEach { println("Old Item: $it") }
     TestWarehouse.Items.set("Burger", Random.nextInt(1, 20))
     TestWarehouse.Items.set("Waffle", Random.nextInt(1, 20))
     TestWarehouse.Items.set("Cake", Random.nextInt(1, 20))

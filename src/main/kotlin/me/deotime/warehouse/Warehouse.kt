@@ -7,6 +7,7 @@ import me.deotime.warehouse.properties.PropertyFactory
 import kotlin.reflect.KProperty
 import kotlin.reflect.KType
 import kotlin.reflect.typeOf
+import kotlin.collections.List as ListValue
 
 interface Warehouse {
 
@@ -43,10 +44,11 @@ interface Warehouse {
 
         }
 
-        interface Collection<K, I> : Flow<I> {
+        interface Collection<K, I> {
             suspend fun size(): Int
             suspend fun remove(at: K): Boolean
             suspend fun clear()
+            suspend fun items(): ListValue<I>
         }
 
         interface Map<K, V> : Property<Map<K, V>>, Collection<K, Pair<K, V>> {
@@ -68,8 +70,8 @@ interface Warehouse {
             suspend fun <U> update(key: K, setter: Setter.With.Empty.Simple<V, U>, closure: (U) -> U) =
                 update(key, { setter.empty().empty() }) { setter.over(it, closure) }
 
-            suspend fun keys(): Flow<K>
-            suspend fun values(): Flow<V>
+            suspend fun keys(): ListValue<K>
+            suspend fun values(): ListValue<V>
 
         }
 

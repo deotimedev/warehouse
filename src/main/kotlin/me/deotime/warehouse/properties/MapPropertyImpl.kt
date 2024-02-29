@@ -1,9 +1,7 @@
 package me.deotime.warehouse.properties
 
-import kotlinx.coroutines.flow.FlowCollector
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.zip
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.KSerializer
 import me.deotime.warehouse.Warehouse
 import java.io.File
@@ -30,20 +28,19 @@ internal class MapPropertyImpl<K, V>(
     }
 
     override suspend fun keys() = sync {
-        flow {
-            for (item in files()) emit(keySerializer.deserialize(File(item, "key")))
-        }
+        files().map { keySerializer.deserialize(File(it, "key")) }
     }
 
     override suspend fun values() = sync {
-        flow {
-            for (item in files()) emit(valueKSerializer.deserialize(File(item, "value")))
-        }
+        files().map { valueKSerializer.deserialize(File(it, "value")) }
     }
 
-    override suspend fun collect(collector: FlowCollector<Pair<K, V>>) {
-        flow { emitAll(keys().zip(values()) { a, b -> a to b }) }
-            .collect(collector)
+    override suspend fun items() = sync {
+        coroutineScope {
+            val keys = async { keys() }
+            val values = async { values() }
+            keys.await().zip(values.await())
+        }
     }
 
 }
